@@ -1,0 +1,172 @@
+// Returns a random DNA base
+const returnRandBase = () => {
+  const dnaBases = ['A', 'T', 'C', 'G']
+  return dnaBases[Math.floor(Math.random() * 4)] 
+}
+
+// Returns a random single strand of DNA containing 15 bases
+const mockUpStrand = () => {
+  const newStrand = []
+  for (let i = 0; i < 15; i++) {
+    newStrand.push(returnRandBase())
+  }
+  return newStrand;
+};
+
+// create a pAequor specimen
+const pAequorFactory = (num, arr) => {
+  return {
+    specimenNum : num,
+    dna : arr,
+    mutate () {
+      let i = Math.floor(Math.random()*15);
+      let oldBase = this.dna[i];
+      let newBase ;
+
+      let oldStrand = this.dna.slice();
+
+      do {newBase = returnRandBase ();} while (
+        newBase === oldBase); 
+      
+      this.dna[i] = newBase;
+
+      // return `index ${i} is ${oldBase} with old strand of ${oldStrand} will be mutated to ${newBase} and have new strand of ${this.dna}`;
+
+      return this.dna ;
+    }, // end bracket for mutate method
+
+    compareDNA (newObj){
+      let count = 0;
+
+      //console.log('Received newObj:', newObj);
+      
+      for (let i = 0 ; i < this.dna.length ; i ++) {
+          if (this.dna[i] === newObj.dna[i]) {
+          count ++;
+          }
+      }
+
+      let percentage = ((count / this.dna.length) * 100).toFixed() ;
+
+      return `speciman #${this.specimenNum} and specimen #${newObj.specimenNum} have ${percentage}% DNA in common`;
+    }, // end bracket for compareDNA method
+
+    willLikelySurvive () {
+      let count = 0 ;
+      for (let i = 0 ; i < this.dna.length ; i ++) {
+        if (this.dna[i] === 'C' || this.dna[i] === 'G') {
+          count ++;
+        }
+      }
+      
+      let percentage = (count / this.dna.length) * 100;
+
+      // return `There's only ${percentage.toFixed()}% of survival with ${count} base that will survive`; 
+
+      return percentage >= 60;
+    }, // end bracket for willLikelySurvive method
+
+    complementStrand() {return this.dna.map(base => {
+    switch (base) {
+      case 'A': return 'T';
+      case 'T': return 'A';
+      case 'C': return 'G';
+      case 'G': return 'C';
+      default:  return base;
+    }})} // end bracket for complementStrand
+
+  } // end bracket for returned property
+}; // end bracket for factory blueprint function
+
+// To agregate the surviving P. aequor specimens, we will create an array to hold the instances of the pAequorFactory that will survive. 
+let survivingPAequor = [];
+let specimenId = 1 ;
+let attempts = 0 ;
+
+// Use while loop to keep creating new instances of the pAequorFactory until we have 30 instances that will survive.
+while(survivingPAequor.length < 30 && attempts < 100) {
+    attempts ++ ;
+    let newSpecimen = pAequorFactory (specimenId, mockUpStrand()); 
+
+    // use the willLikelySurvive() method to check if the instance will survive. If it will, we will push it into the survivingPAequor array. 
+    if(newSpecimen.willLikelySurvive()) {
+        survivingPAequor.push(newSpecimen);
+        specimenId ++;
+    }
+    }
+
+// console.log(survivingPAequor);
+// console.log(survivingPAequor[2].complementStrand());
+
+
+// FIND TWO MOST RELATED INSTANCE OF P. AEQUOR
+const relatedInstance = arr => 
+{
+    // use -1 as placeholder, so that if the highest % is 0% then it will still be updated
+    let highestPercentage = -1 ;
+    let pair = [];
+    
+    for (let i = 0 ; i < survivingPAequor.length ; i ++) {
+    for (let j = i + 1 ; j < survivingPAequor.length ; j++) { // for j = i+1 so that we don't compare the same instance with itself and also to avoid comparing the same pair twice. For example, if we compare instance 1 with instance 2, we don't need to compare instance 2 with instance 1 again.
+    
+    // check the DNA similarity between two instances of pAequorFactory using the compareDNA() method. 
+    const result = survivingPAequor[i].compareDNA(survivingPAequor[j]);
+
+    // .match() searches the string using a Regular Expression (a text pattern finder).
+    // /(\d+)%/ is the regex pattern: 
+    // - \d+ means "one or more digits/numbers".
+    // - (...) creates a capture group, telling JavaScript: "Remember just the digits inside these parentheses."
+    // - % means the digits must be followed immediately by a % sign.
+    const match = result.match(/(\d+)%/);
+    
+    // if the match value exist, take the value at index 1 into numeric value
+    // if the match value does not exist, then set percentage to 0 and we use parseInt() to convert the string to a number. then match[1] because there's 2 values in the array, the first value is the entire match, and the second value is the first capture group. We want the first capture group, which is the digits before the % sign. 
+    const percentage = match ? parseInt(match[1]) : 0;
+
+    // if the percentage is greater than the highest percentage, then update the highest percentage and store the pair of instances in the pair array.
+    if (percentage > highestPercentage) {
+        highestPercentage = percentage;
+        pair = [survivingPAequor[i],survivingPAequor[j]];
+          } // end bracket if condition 
+
+        } // end bracket of inner 'for' loop 
+      } // end bracket of outer 'for' loop
+
+    return pair.length > 0 ? pair[0].compareDNA(pair[1]) : '';
+};
+
+console.log(relatedInstance(survivingPAequor));
+
+
+/* const newSpecies = pAequorFactory(5,mockUpStrand());
+
+const ex1 = {
+  specimenNum : 10,
+  dna : [
+    'A', 'G', 'G', 'G',
+    'G', 'G', 'A', 'A',
+    'C', 'G', 'G', 'C',
+    'C', 'C', 'G'
+  ]
+};
+
+console.log (newSpecies.dna);
+console.log('\n');
+console.log (newSpecies.compareDNA(ex1));
+console.log('\n');
+console.log (newSpecies.mutate());
+console.log('\n');
+console.log (newSpecies.willLikelySurvive()); */
+
+
+
+// console.log(mockUpStrand());
+
+
+
+
+
+
+
+
+
