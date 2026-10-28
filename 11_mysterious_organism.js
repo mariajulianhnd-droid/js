@@ -81,19 +81,17 @@ const pAequorFactory = (num, arr) => {
 // To agregate the surviving P. aequor specimens, we will create an array to hold the instances of the pAequorFactory that will survive. 
 let survivingPAequor = [];
 let specimenId = 1 ;
-let attempts = 0 ;
 
 // Use while loop to keep creating new instances of the pAequorFactory until we have 30 instances that will survive.
-while(survivingPAequor.length < 30 && attempts < 100) {
-    attempts ++ ;
-    let newSpecimen = pAequorFactory (specimenId, mockUpStrand()); 
+while(survivingPAequor.length < 30) {
+  let newSpecimen = pAequorFactory (specimenId, mockUpStrand()); 
 
-    // use the willLikelySurvive() method to check if the instance will survive. If it will, we will push it into the survivingPAequor array. 
-    if(newSpecimen.willLikelySurvive()) {
-        survivingPAequor.push(newSpecimen);
-        specimenId ++;
-    }
-    }
+  // use the willLikelySurvive() method to check if the instance will survive. If it will, we will push it into the survivingPAequor array. 
+  if(newSpecimen.willLikelySurvive()) {
+    survivingPAequor.push(newSpecimen);
+    specimenId ++;
+  }
+}
 
 // console.log(survivingPAequor);
 // console.log(survivingPAequor[2].complementStrand());
